@@ -74,7 +74,7 @@ var qrcode = document.createElement("img");
 var qrurl = document.createElement("div");
 	qrurl.setAttribute('class','shaunsational_qr');
 	qrurl.setAttribute('id','qrurl');
-qrurl.setAttribute('style','background:#FFF;margin:5px auto auto auto;padding:2px 15px;cursor:pointer;width:330px;font-size:10px;color:#333;-moz-border-radius:20px;text-align:center;overflow:hidden;');
+qrurl.setAttribute('style','background:#FFF;margin:5px auto auto auto;padding:2px 15px;cursor:pointer;width:320px;font-size:10px;color:#333;-moz-border-radius:20px;text-align:center;overflow:hidden;');
 	var qrurl_text = document.createTextNode(qrData);
 		qrurl.appendChild(qrurl_text);
 
