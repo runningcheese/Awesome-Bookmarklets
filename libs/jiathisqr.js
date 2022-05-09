@@ -68,7 +68,7 @@ var qrcode = document.createElement("img");
 	qrcode.setAttribute('class','shaunsational_qr');
 	qrcode.setAttribute('id','qrcode');
 	qrcode.setAttribute('style','margin:10px;cursor:pointer;');
-	qrcode.setAttribute('src','https://api.isoyu.com/qr/?m=1&e=H&p=10&url=' + decodeURIComponent(qrData));
+	qrcode.setAttribute('src','https://my.tv.sohu.com/user/a/wvideo/getQRCode.do?text=' + decodeURIComponent(qrData));
 	qrcode.setAttribute('title','Click to close.');
 	
 var qrurl = document.createElement("div");
