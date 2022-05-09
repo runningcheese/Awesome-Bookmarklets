@@ -67,8 +67,8 @@ var qrdiv = document.createElement("div");
 var qrcode = document.createElement("img");
 	qrcode.setAttribute('class','shaunsational_qr');
 	qrcode.setAttribute('id','qrcode');
-	qrcode.setAttribute('style','width:300px;height:300px;cursor:pointer;');
-	qrcode.setAttribute('src','https://my.tv.sohu.com/user/a/wvideo/getQRCode.do?text=' + decodeURIComponent(qrData));
+	qrcode.setAttribute('style','cursor:pointer;');
+	qrcode.setAttribute('src','https://my.tv.sohu.com/user/a/wvideo/getQRCode.do?text=' + decodeURIComponent(qrData) + '&width=300&height=300');
 	qrcode.setAttribute('title','Click to close.');
 	
 var qrurl = document.createElement("div");
