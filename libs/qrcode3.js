@@ -67,14 +67,14 @@ var qrdiv = document.createElement("div");
 var qrcode = document.createElement("img");
 	qrcode.setAttribute('class','shaunsational_qr');
 	qrcode.setAttribute('id','qrcode');
-	qrcode.setAttribute('style','margin:-10px;cursor:pointer;');
+	qrcode.setAttribute('style','margin:20px;cursor:pointer;');
 	qrcode.setAttribute('src','https://www.lofter.com/genBitmaxImage?url=' + decodeURIComponent(qrData) + '&h=330&w=330');
 	qrcode.setAttribute('title','Click to close.');
 	
 var qrurl = document.createElement("div");
 	qrurl.setAttribute('class','shaunsational_qr');
 	qrurl.setAttribute('id','qrurl');
-qrurl.setAttribute('style','background:#FFF;margin:5px auto auto auto;padding:20px;cursor:pointer;width:330px;font-size:10px;color:#333;-moz-border-radius:20px;text-align:center;overflow:hidden;');
+qrurl.setAttribute('style','background:#FFF;margin:5px auto auto auto;padding:2px 15px;cursor:pointer;width:330px;font-size:10px;color:#333;-moz-border-radius:20px;text-align:center;overflow:hidden;');
 	var qrurl_text = document.createTextNode(qrData);
 		qrurl.appendChild(qrurl_text);
 
