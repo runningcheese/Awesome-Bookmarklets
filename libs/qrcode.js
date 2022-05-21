@@ -68,7 +68,7 @@ var qrcode = document.createElement("img");
 	qrcode.setAttribute('class','shaunsational_qr');
 	qrcode.setAttribute('id','qrcode');
 	qrcode.setAttribute('style','margin:-10px;cursor:pointer;');
-	qrcode.setAttribute('src','https://my.tv.sohu.com/user/a/wvideo/getQRCode.do?text=' + decodeURIComponent(qrData) + '&width=330&height=330');
+	qrcode.setAttribute('src','https://www.lofter.com/genBitmaxImage?url=' + decodeURIComponent(qrData) + '&h=330&w=330.png');
 	qrcode.setAttribute('title','Click to close.');
 	
 var qrurl = document.createElement("div");
