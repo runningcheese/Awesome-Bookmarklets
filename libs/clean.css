@@ -50,8 +50,12 @@ a {
   transition: border-bottom-color .15s ease-out,color .2s ease-out;
 }
 
+a:hover {
+  border-bottom: 1px solid #3878f8;
+}
+
 pre {
-  background-color: #eee;
+  background-color: #eff1f3;
   border-radius: 6px;
   padding: 1rem;
 }
