@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>CSS → SVG 转换器</title>
+<style>
+*{-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box}
+*:not(#NO):not(#IE){filter:none} 
+
+html,body{min-height:100%;margin:0;text-shadow:none}
+body{font:1em/1.35 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;background:#f8f9fa;overflow-x:hidden;color:#333}
+
+a{text-decoration:none;border-bottom:none;color:#007bff}label>a{border:0;vertical-align:super;font:italic 90%/0 sans-serif}a:hover{background:transparent;color:#0056b3}
+div,svg,textarea,#output{display:block;margin:0.25em auto}
+h1,h2,.no-js,p.inputboxes,button,#footer,#git{text-align:center}
+
+p{margin:-.25em 0}.no-js,#preview p,#downwarn{color:#dc3545}
+.inputboxes,.outputboxes,#preview{margin:.5em auto;width:90%;max-width:650px}
+.inputboxes{border:none;margin-bottom:20px;padding:20px;border-radius:12px;background:#fff;border:1px solid #ced4da;}
+textarea,#preview{width:100%;resize:vertical}
+input:focus,textarea:focus,code,kbd{outline:0;background:#f8f9fa;border-color:#007bff}
+#cssinput{height:200px;padding:12px;border:1px solid #ced4da;border-radius:8px;font-family:Consolas,monospace,serif;transition:border-color 0.2s ease}
+#cssinput:focus{box-shadow:0 0 0 3px rgba(0,123,255,0.25)}
+input:disabled+label{color:#6c757d}
+#userH,#userW,textarea,code,kbd{font:normal 1em Consolas,monospace,serif}
+#userH,#userW,textarea{border:solid 1px #ced4da;font-size:90%;overflow:auto} 
+#userH,#userW{width:60px;padding:4px 8px;border-radius:4px}
+#wrap{position:relative;margin-top:30px;}
+
+button{border:none;float:right;margin:0 0 0 2em;height:40px;min-width:80px;font-weight:500;cursor:pointer;
+	border-radius:6px;background:#f8f9fa;color:#007bff;transition:all 0.2s ease;box-shadow:0 2px 5px rgba(0,0,0,0.05)}
+button:disabled{cursor:not-allowed;opacity:0.6}
+button{color:#fff;background:#007bff;transform:translateY(-1px);margin:-20px 10px 10px 12px;}
+#convert{position:absolute;top:0;right:0;color:#fff;background:#007bff;border-color:#28a745}
+#convert:hover,#convert:focus{background:#007bff;transform:translateY(-1px);box-shadow:0 4px 8px rgba(0,0,0,0.1)}
+
+.outputboxes textarea{height:220px;padding:15px;border-radius:8px;border:1px solid #ced4da;background:#E9ECEF}
+#output,#preview{margin:.75em auto;padding-top:10px;}
+textarea[readonly]{background:#e9ecef;color:#495057}
+svg{margin:0 auto;border:1px solid #dee2e6;background:#fff;border-radius:8px;height:250px;}
+#uritext,#warn,#git{display:none}
+#footer{font-size:90%;color:#6c757d}
+
+/* 隐藏uricheck和batch选项 */
+#uricheck, #batch, label[for="uricheck"], label[for="batch"],#userUnit,#uricode,label[for="userUnit"],#userW,#userH{
+    display: none !important;
+}
+
+/* 现代化表单元素样式 */
+input[type="checkbox"], input[type="radio"] {
+    margin-right: 6px;
+    accent-color: #007bff;
+}
+
+label {
+    font-weight: 400;
+    color: #495057;
+    margin-right: 15px;
+}
+
+h1 {
+    color: #212529;
+    font-weight: 300;
+    margin: 10px 0 20px 0;
+    font-size: 1.75em;
+}
+
+h2 {
+    color: #495057;
+    font-weight: 400;
+    margin: 25px 0 15px 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    
+    button {
+        float: none;
+        display: block;
+marging:10px;
+    }
+    
+    #convert {
+        position: static;
+        margin-top: 15px;
+    }
+    
+    #wrap {
+        text-align: center;
+    }
+}
+#convert, #updateb, #saveSvg, #savePng {
+    position: static;
+    display: inline-block;
+    margin-right: 50px;
+}
+
+#wrap {
+    position: relative;
+    text-align: center; /* 将按钮居中显示 */
+    padding-top: 5px; /* 增加整体上方的padding */
+    padding-bottom: 8px; /* 增加整体上方的padding */
+}
+</style>
+</head>
+<body>
+
+
+<div class="inputboxes">
+    <h1>CSS → SVG 转换器</h1>
+	<form>
+	<textarea id="cssinput" placeholder="在此输入 CSS 渐变代码..."></textarea>
+	<div id="wrap">
+	<!-- 已隐藏的选项 -->
+	<input type="checkbox" id="uricheck"/><label for="uricheck">为IE9生成CSS（数据URI输出） <a href="http://css-tricks.com/data-uris/" title="了解更多关于数据URI的信息">(?)</a></label>
+	<input type="checkbox" id="batch" disabled="disabled"/><label for="batch">批处理模式 <a href="https://github.com/camartinez1229/css2svg/blob/master/advanced-usage-techniques.md#batch-mode" title="在Github页面上阅读功能说明">(?)</a></label>
+	<p><!-- 宽度: --><input id="userW" placeholder="1920"/> <!--高度: --><input id="userH" placeholder="1080"/> 
+	<input type="radio" name="userUnit" id="userUnit" checked="checked"/><label for="userUnit">像素</label></p>
+	<button id="convert">转换</button>
+	<button id="updateb" disabled>更新转换</button>
+	<button id="saveSvg" style="background: #28a745; border-color: #28a745;">另为 SVG</button>
+	<button id="savePng" style="background: #28a745; border-color: #28a745;">另为 PNG</button>
+	</div>
+	</form>
+</div>
+
+<div class="outputboxes">
+<div id="outputtext">
+
+<textarea id="output" readonly="readonly" placeholder="SVG 输出将显示在这里..."></textarea>
+</div>
+<div id="updatetext"></div>
+<div id="uritext">
+<p id="urip"><em id="warn">批处理模式激活时预览显示/更新已禁用。</em><span id="bexp"></span></p>
+<textarea id="uricode" readonly="readonly"></textarea>
+</div>
+<div id="footer">
+
+
+
+</div>
+</div>
+
+<script>
+
+(function(){"use strict"; 
+
+var doc=document; 
+
+window.trim||(String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g,'');});
+
+
+function split(string){
+    var token = /((?:(?:rgb|hsl)a?\(.*?\)\s*\d{0,3}(?:\.\d+)?%?|[^"']|".*?"|'.*?')*?)([(),]|$)/g; 
+    token.lastIndex=0;
+	return (function recurse(){
+        for(var array = [];;) {
+			var result = '';
+			result = token.exec(string);
+            if(result[2] === '(') {
+				array.push(result[1].trim() + '(' + recurse().join(',') + ')');
+                result = token.exec(string);
+            } else {array.push(result[1].trim());}
+			if(result[2] !== ','){return array;}
+        }
+    })();
+}
+
+var vect,svg,uri,h,w,
+defSvg='<svg width="1920px" height="1080px" style="background:#f8f9fa;border:1px solid #ced4da;width:100%;height:250px;"></svg>',
+uH=doc.getElementById('userH'),uW=doc.getElementById('userW'),
+inp=doc.getElementById('cssinput'),out=doc.getElementById('output'),
+convert=doc.getElementById('convert'),update=doc.getElementById('updatetext'),
+u=doc.getElementById('uricheck'),b=doc.getElementById('batch'),
+uTxt=doc.getElementById('uritext'),uCode=doc.getElementById('uricode'),
+bWarn=doc.getElementById('warn'),bExp=doc.getElementById('bexp'),
+uOut,bgsUriOut,bUriOut,sel,rep,
+x1,y1,x2,y2,tx1,ty1,tx2,ty2,c=100,
+
+dir,dl,bgs,co,col,
+colorArr=[],stopArr,stl,
+units,prev,prevW,bl,oldWebkit,error,bgSize,bgSizeStr,updateB,toFromFix,hex,downWarnDiv,
+cocheck="请检查您的渐变方向和/或颜色值。",
+trans=/rgba|hsla|transparent/,bgSt=/background-size:[^;}]+/i;
+
+
+function hasInlSvg(){var svgd = doc.createElement('div');svgd.innerHTML='<svg/>';return(svgd.firstChild && svgd.firstChild.namespaceURI)==='http://www.w3.org/2000/svg';}
+
+
+function uTog(){b.disabled=!u.checked;}
+
+
+function bTog(){
+	var blo='block',inl='inline',no='none';
+	if(b.checked&&!inp.value){inp.value='.ex1{background:linear-gradient(75deg,#fff,#000)}\n.ex2{background:linear-gradient(to top left,rgba(34,62,99,.5),#fc0,#fedcba)}'}
+	update.style.display = doc.getElementById('outputtext').style.display = b.checked ? no : blo;
+	uTxt.style.display = b.checked ? blo : no;
+	u.disabled = b.checked;
+	if(b.checked && hasInlSvg())
+		{bWarn.style.display=inl; if(b.checked){bExp.style.display=no;}}
+	else{bExp.style.display=inl;bWarn.style.display=no;}
+	out.value=uCode.value='';
+
+	if(hasInlSvg())
+		{prev=doc.getElementById('preview'),downWarnDiv=doc.getElementById('downwarn');
+		downWarnDiv.innerHTML=prev.style.cssText='';
+		prev.innerHTML=defSvg;prevW=update.clientWidth;
+		updateB.disabled=out.readOnly=1;}
+}
+
+u.onclick=uTog; b.onclick=bTog;
+window.onload=function(){uTog();bTog();}; 
+inp.onkeydown=function(e){ent(e,convert);};
+doc.forms[0].onsubmit=function(){return !1;};
+
+
+function ent(e,id){e=e||event;
+	if(e.keyCode===13&&e.shiftKey){id.click();
+		e.preventDefault ? e.preventDefault() : e.returnValue=0; 
+	}
+}
+
+if(hasInlSvg())
+	{update.innerHTML='<p></p><div id="downwarn"></div><div id="preview">'+defSvg+'</div>';
+	updateB=doc.getElementById('updateb');
+	out.onkeydown=function(e){ent(e,updateB);};
+	updateB.onclick=updatePreview;
+	
+	// 添加保存功能
+	doc.getElementById('saveSvg').onclick = function() {
+		if (!out.value || out.value.includes('ERROR')) {
+			alert('请先生成有效的SVG内容');
+			return;
+		}
+		var blob = new Blob([out.value], {type: 'image/svg+xml'});
+		var url = URL.createObjectURL(blob);
+		var a = document.createElement('a');
+		a.href = url;
+		a.download = 'gradient.svg';
+		a.click();
+		URL.revokeObjectURL(url);
+	};
+	
+	doc.getElementById('savePng').onclick = function() {
+		if (!out.value || out.value.includes('ERROR')) {
+			alert('请先生成有效的SVG内容');
+			return;
+		}
+		
+		// 创建一个临时容器来显示SVG
+		var tempDiv = document.createElement('div');
+		tempDiv.style.position = 'absolute';
+		tempDiv.style.left = '-9999px';
+		tempDiv.style.top = '-9999px';
+		document.body.appendChild(tempDiv);
+		
+		// 将SVG内容放入临时容器
+		tempDiv.innerHTML = out.value;
+		var svgElement = tempDiv.querySelector('svg');
+		
+		// 确保SVG尺寸正确
+		svgElement.setAttribute('width', w || 300);
+		svgElement.setAttribute('height', h || 300);
+		
+		// 加载dom-to-image库（如果尚未加载）
+		if (!window.domtoimage) {
+			var script = document.createElement('script');
+			script.src = 'https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js';
+			script.onload = function() {
+				captureWithDomToImage(svgElement);
+			};
+			document.head.appendChild(script);
+		} else {
+			captureWithDomToImage(svgElement);
+		}
+		
+		function captureWithDomToImage(element) {
+			// 使用dom-to-image生成PNG
+			window.domtoimage.toPng(element, {
+				width: element.getAttribute('width'),
+				height: element.getAttribute('height')
+			})
+			.then(function(dataUrl) {
+				// 创建下载链接
+				var a = document.createElement('a');
+				a.href = dataUrl;
+				a.download = 'gradient.png';
+				a.click();
+				
+				// 清理临时元素
+				document.body.removeChild(tempDiv);
+			})
+			.catch(function(error) {
+				alert('PNG转换失败: ' + error);
+				document.body.removeChild(tempDiv);
+			});
+		}
+	};
+}
+
+convert.onclick=function(){
+	if(!inp.value){error='此脚本目前无法读取您的想法。请至少输入一个渐变供其使用——谢谢！';out.value=uCode.value=error;return !1;}
+	oldWebkit=toFromFix=vect=svg=bgSize=bgsUriOut=bUriOut=sel=''; 
+	w = !!uW.value ? parseFloat(uW.value) : 1920, h = !!uH.value ? parseFloat(uH.value) : 1080,
+	units = doc.getElementById('userUnit').checked ? 'px' : '%';
+
+	if(b.checked) 
+		{
+		var css=inp.value.replace(/}/g,'}~'),cssA=css.split('~');
+		cssA.pop(); 
+		var csl=cssA.length;cssA.reverse(); 
+		if(!csl){bUriOut='ERROR: You must have at least one well-formed CSS selector, e.g., ".selector{background:linear-gradient(#fff,#000)}", in order for Batch Mode to work.';}
+		while(csl--) 
+			{sel=cssA[csl].match(/.*?{/);cssA[csl]=cssA[csl].replace(sel,'');
+			splitGradient(cssA[csl]);
+			if(!!error){bUriOut+=sel+' <<<<<ERROR: '+error+'>>>>> }\n\n';}
+			}
+		uCode.value=bUriOut;
+		}
+	else{splitGradient(inp.value);
+		if(!!error){bTog();out.value=uCode.value='ERROR: '+error;}
+	}
+	if(hasInlSvg()&&!bgSize){updateB.disabled=out.readOnly=!!error;} 
+}
+
+function splitGradient(string){bgsUriOut=dir=error=uri=''; 
+	if(string.match(/radial/)){error="目前只支持线性渐变 LINEAR gradients.";return !1;}
+	else if(string.match(/\d(r?em|ex|ch|vh|vm|vmin|vmax)/)){error='Font- or viewport-relative units are not supported. Valid units are "%", "px", "cm", "mm", "in", "pt", and "pc".';return !1;}
+
+	else if(string.match(/#([\da-f]{4,5}|[\da-f]{1,2})\W/)){error=cocheck;return !1;}
+	if(string.match(bgSt)){bgSize='yes'; bgSizeStr=string.match(bgSt)[0]; string=string.replace(bgSt,'');}
+	bTog();
+	bgs = split(string),bl=bgs.length;
+
+	if(!!bgSize){bgs.reverse();}
+
+	while(bl--){rep='';stopArr=[];
+		if(bgs[bl].match(/repeating/)){rep='yes';}
+
+		if(bgs[bl].match(/\-?\d{0,3}(\.\d+)?(deg|g?rad\b|turn)/)){dir=bgs[bl].match(/\-?\d{0,3}(?:\.\d+)?(?:deg|g?rad|turn)/gi);
+			if(dir[1].match(/g?rad|turn/)) 
+				{var pf1=parseFloat(dir[1]);
+				if(dir[1].match(/grad/)){dir[1]=pf1/1.1111111;}
+				else if(dir[1].match(/rad/)){dir[1]=pf1/0.0174532925199;}
+				else{dir[1]=pf1*360;}
+				}
+			dir=parseFloat(dir[1]);
+			if(!bgs[bl].match(/-(moz|webkit|o|ms)-/)){dir=90-dir;} 
+		}
+
+		else if(bgs[bl].match(/-webkit-gradient/)){var s=/left|right|\btop\b|bottom|center/g;dl=4;
+			if(bgs[bl].match(s))
+				{dir=bgs[bl].match(s);
+				while(dl--){dir[dl]=dir[dl].replace(/left|top/g,0).replace(/right|bottom/g,100).replace(/center/g,50);} 
+				}
+			else{ 
+				dir=bgs[bl].match(/(\-?\d+\.?\d*%?)/g);
+				dir=dir.slice(0,4); 
+				while(dl--)
+					{if(!dir[dl].match(/%/)) 
+						{var wh = dl % 2 === 1 ? h : w; 
+						dir[dl]=dir[dl]/wh*c;}
+					dir[dl]=parseFloat(dir[dl]);
+					}
+			}
+			x1=Math.round(dir[0]*c)/c,y1=Math.round(dir[1]*c)/c,
+			x2=Math.round(dir[2]*c)/c,y2=Math.round(dir[3]*c)/c;
+			oldWebkit = 'yes', toFromFix = bgs[bl].match(/from\(.*?\),\s*to\(.*?\),\s*color-stop/) ? 'yes' : ''; 
+		}
+
+		else if(bgs[bl].match(/(to )?(top|left|right|bottom)/)){dir=bgs[bl].match(/(to )?(top|left|right|bottom)\s?(top|left|right|bottom)?/gi); 
+			if(dir[0].match(/(right|left)/)){dir[0]=dir[0].replace(/(right|left)\s(top|bottom)/g,"$2$1");} 
+			dir=dir[0].replace(/\s/g,'');
+		}
+		else if(!bgs[bl].match('center')){dir='tobottom';} 
+		bgs[bl]=bgs[bl].replace(/.*?{|color-stop|repeating|linear|radial|gradient|-(moz|webkit|o|ms)-|background(-image)?\:|deg|g?rad|turn|to\s|\btop\b|right|left|bottom|center|-(?!\s+\d)|^\(,|\)$| \b/gm,'').
+
+		replace(/(\)|#(?:[\da-f]{3}){1,2}(?!(?:%|px|cm|mm|in\b|pt|pc))|(?:from|to|[^blac])\(|(?:,|\()[a-z]+)(calc\([^)]+\)|\d{0,3}\.?\d*(%|px|cm|mm|in\b|pt|pc)|0?\.\d+)/ig,"$1'$2'");
+
+		colorArr=bgs[bl].match(/(?:from\(|to\()?('.*?',)?(#([\da-f]{3}){1,2}(?!%|px|cm|mm|in\b|pt|pc)|(rgb|hsl)a?\((\d{0,3}(\.\d+)?%?,?){3}[0-1]?\.?\d*\)|[a-z]{5,}|[a-eg-z]{3,})('.*?')?/gi),col=colorArr.length,co=col;
+		while(col--)
+			{stopArr[col]=colorArr[col].replace(/.*?'|[^']*/,"'").replace(/'(.*?)'.*?,/,"$1").replace(/'/g,''); 
+			colorArr[col]=colorArr[col].replace(/(from|to)\(|'.*?',?/g,''); 
+			var d=doc.createElement('div');
+			d.style.cssText="color:rgba(0,0,0,0)";
+			if(d.style.color){
+				d.style.cssText='color:'+colorArr[col];
+				if(!d.style.color){error=cocheck;return !1;}
+			}
+			d=null;
+		}
+		stl=stopArr.length;
+		if(!!oldWebkit){
+			while(stl--){if(!stopArr[stl].match(/%/)){stopArr[stl]=parseFloat(stopArr[stl])*c+'%';}} 
+			if(!!toFromFix){var fix=colorArr.splice(1,1);colorArr.push(fix.toString());stopArr.splice(1,1);stopArr.push('100%');}
+			}
+		if(!oldWebkit){normalizeAngle(dir,bl);}
+		else{buildSvg(bl);}
+		if(!!error){return !1;}
+		if(!!bgSize){finishSVG(svg,uri,1);} 
+	}
+	if(!bgSize&&!error){finishSVG(svg,uri,bgs.length);}
+	else{
+		if(b.checked){bUriOut+=sel+'background:'+bgsUriOut+'}\n\n'; bUriOut=bUriOut.replace(/,\n}/g,'}');}
+		bgsUriOut=bgsUriOut.replace(/,\n$|,$/g,''); uCode.value=bgsUriOut;
+		out.readOnly=1;out.value='如果使用了"background-size"，那么编辑区域将不可用，请在原输入框里编辑。';
+		if(hasInlSvg()){updateB.disabled=1;sizePreview(bgsUriOut);}
+	}
+}
+
+function normalizeAngle(st,bl){var d='to',t='top',r='right',b='bottom',l='left';
+	if(isNum(st)){svgAngle(st,bl);} 
+	else{ 
+
+	x1=y1=y2=tx1=ty1=tx2=ty2=0,x2=c; 
+		if(st===d+r||st===l){tx2=w;}
+		else if(st===d+t+r||st===b+l){y1=c,ty1=h,tx2=w;}
+		else if(st===d+t||st===b){x1=y1=c,tx1=tx2=w,ty1=h;}
+		else if(st===d+t+l||st===b+r){x1=y1=c,x2=0,tx1=w,ty1=h;}
+		else if(st===d+l||st===r){x1=y1=y2=c,x2=0,tx1=ty2=w,ty1=h;}
+		else if(st===d+b+l||st===t+r){x1=y2=c,x2=0,tx1=w,ty2=h;}
+		else if(st===d+b||st===t){x2=0,y2=c,ty2=h;}
+		else if(st===d+b+r||st===t+l){y2=c,tx2=w,ty2=h;}
+		else{error="Check your direction value(s). Valid keywords are 'top', 'right', 'bottom', and 'left'.";return !1;}
+		buildSvg(bl);
+	}
+}
+
+
+function isNum(o){return!isNaN(o-0)&&o!==null&&o!==""&&o!==false;}
+
+function svgAngle(v,bl){
+	
+	var wc=w/2,hc=h/2,
+	m,n=0,o=0,r=360,mx=10000,
+	k=((v%r)+r)%r,
+	j=(r-k)*Math.PI/180,
+	i=Math.tan(j),
+	l=hc-i*wc;
+	tx1=ty1=tx2=ty2=null;
+	if(k===0){tx1=w,ty1=ty2=hc,tx2='0';}
+	else if(k<90||k>270){n=w;}
+	else if(k===90){tx1=tx2=wc,ty1='0',ty2=h;}
+	else if(k===180){tx1='0',ty1=ty2=hc,tx2=w;}
+	else if(k===270){tx1=tx2=wc,ty1=h,ty2='0';}
+	if(k>180){o=h;}
+	m=o+(n/i);
+	
+	tx1 = !tx1 ? i*(m-l)/(Math.pow(i,2)+1) : tx1;
+	ty1 = !ty1 ? i*tx1+l : ty1,
+	tx2 = !tx2 ? w-tx1 : tx2,
+	ty2 = !ty2 ? h-ty1 : ty2;
+	x1=Math.round(tx2/w*mx)/c,y1=Math.round(ty2/h*mx)/c,
+	x2=Math.round(tx1/w*mx)/c,y2=Math.round(ty1/h*mx)/c,
+	buildSvg(bl);
+}
+
+function buildSvg(bl){var sGrad='',uGrad='',sj=stopArr.join(),
+	sal = stopArr.length, sr = sal < 20 ? 1000 : 10000, 
+	rl=Math.sqrt(Math.pow(tx1-tx2,2) + Math.pow(ty1-ty2,2)); 
+
+	if(!isNum(parseFloat(stopArr[0]))){stopArr[0]='0%';}
+	if(!isNum(parseFloat(stopArr[co-1]))){stopArr[co-1]= !sj.match(/calc|px|cm|mm|in\b|pt|pc/) ? '100%' : rl+"px";}
+	calcStops(rl); 
+	if(!!error){return !1;}
+	
+	if(y1===y2){y1=y2=0;} 
+	vect=" gradientUnits='userSpaceOnUse' x1='"+x1+"%' y1='"+y1+"%' x2='"+x2+"%' y2='"+y2+"%'";
+	
+	if (x1>=0&&x1<=c && y1>=0&&y1<=c && x2>=0&&x2<=c && y2>=0&&y2<=c && !oldWebkit){vect=vect.replace(" gradientUnits='userSpaceOnUse'",'');}
+
+	if(!vect.match(/gradientUnits/))
+	
+	{vect=vect.replace(/x1='[^']+/,"x1='"+x1/c).replace(/y1='[^']+/,"y1='"+y1/c).replace(/x2='[^']+/,"x2='"+x2/c).replace(/y2='[^']+/,"y2='"+y2/c);}
+	
+	bl = !bgSize ? bl : 0; 
+	vect="<linearGradient id='g"+(bl+1)+"'"+vect+">\n";
+	for(var i=0;i<sal;i++){var s=stopArr[i],ps=parseFloat(s); s = !s.match(/px/) ? ps/c : ps/rl; 
+		var off=Math.round(s*sr)/sr,color=fixColor(colorArr[i]),opac=addOpacity(colorArr[i]);
+		sGrad+="<stop offset='"+off+"' stop-color='"+color+"'";
+		if(colorArr[i].match(trans)){sGrad+=" stop-opacity='"+opac+"'";}
+		sGrad+="/>\n";
+
+		if(u.checked||!!bgSize)
+			{uGrad+="<stop offset='"+off+"'";
+			color = u.checked&&colorArr[i].match(trans) ? colorArr[i] : color;
+			uGrad+=" stop-color='"+color+"'";
+			if(!u.checked&&colorArr[i].match(trans)){uGrad+=" stop-opacity='"+opac+"'";}
+			uGrad+='/>\n';
+			}
+	}
+
+	if(!!rep) 
+		{var stops=sGrad.match(/t='(\d?\.?\d+)'/g),sl,sl2,nStops=[];sl=sl2=stops.length;
+		while(sl--){stops[sl]=stops[sl].replace(/t='|'/g,'');}
+		var pso=parseFloat(stops[sl2-1]),diff=pso-parseFloat(stops[0]),mul=1/pso;
+		while(sl2--)
+			{nStops[sl2]=Math.round(parseFloat(stops[sl2])*mul*sr)/sr,nStops[0]=0,
+			sGrad=sGrad.replace(stops[sl2],nStops[sl2]);
+			if(u.checked||!!bgSize){uGrad=uGrad.replace(stops[sl2],nStops[sl2]);}
+			}
+		var xy=[x1,y1,x2,y2],z=4;while(z--){xy[z]=Math.round(xy[z]*diff*c)/c+'%';}
+		vect=vect.replace(/x1='[^']+/,"x1='"+xy[0]).replace(/y1='[^']+/,"y1='"+xy[1]).replace(/x2='[^']+/,"x2='"+xy[2]).replace(/y2='[^']+/,"y2='"+xy[3]).replace("ent ","ent spreadMethod='repeat' ");
+		}
+
+	vect=vect.replace(/ x1='0%?'| x2='(100%|1)'| y1='0%?'| y2='0%?'/g,'').replace("'0%","'0"); 
+
+	if(!bgSize){svg+=vect,uri+=vect;}
+	else{svg=vect,uri=vect;}
+	svg=svg+sGrad,uri=uri+uGrad;
+
+
+	var s2=/offset='0' | stop-opacity='1'/g,s3=/'0\./g,r="'.",en="</linearGradient>\n";
+	svg=svg.replace(s2,'').replace(s3,r)+en;
+	uri=uri.replace(s2,'').replace(s3,r)+en;
+	return svg,uri;
+}
+
+function calcStops(rl){var u=0,y=0,stp=0;
+	while(y<stl){
+		if(stopArr[y].match(/\d/)){
+			if(stopArr[y].match(/calc|cm|mm|in|pt|pc/)){stopArr[y]=fixStops(stopArr[y],rl);}
+			var unit=stopArr[y].match(/%|px/),s=y,z=0,st=parseFloat(stopArr[s]);
+			while(z<s){
+				if(!stopArr[z].match(/\d/)){stopArr[z]=stp+((st-stp)/(s-u))*(z-u)+unit;}
+			z++;
+			}
+		u=z,stp=parseFloat(stopArr[s]);
+		}
+	y++;
+	}
+}
+
+
+function fixStops(x,rl,g,f,y,i,z){y=1,z='';
+
+	if(!x.match(/calc/)){f=parseFloat(x);}
+	else{g=x.replace(/^calc\(|\)$/g,'').replace(/(\*|\/)/g,' $1 ').split(' '),y=g.length;}
+		for(i=0;i<y;i++){
+			if(y>1){x=g[i],f=parseFloat(g[i]);}
+			if(x.match(/cm/)){f*=37.79527559;}
+			else if(x.match(/mm/)){f*=3.779527559;}
+			else if(x.match(/in/)){f*=96;}
+			else if(x.match(/pt/)){f*=1.33333333;}
+			else if(x.match(/pc/)){f*=16;}
+			else if(x.match(/%/)){f=(f/100)*rl;}
+			else if(!x.match(/px/)){f=x;}
+			if(y>1){z+=f;} 
+		}
+	return z ? eval(z)+'px' : (f*c)/c+'px';
+}
+
+function fixColor(hu){
+
+	var crgb,cl,cp,cpl,hsl,flo=/(\d+(\.\d+)?)|\.\d+/g,na=/[a-z]{8,}|black|white|yellow|fuchsia|magenta/i;
+	if(hu.match(/transparent/))
+		{return '#000';} 
+	
+	else if(hu.match(/rgba?|hsla?/)||hu.match(na))
+		{if(hu.match(/rgba?/))
+			{if(hu.match(/%/))
+				{cp=hu.match(flo),cpl=cp.length;
+					while(cpl--){cp[cpl]=cp[cpl]/c*255;}
+				}
+			crgb = !cp ? hu.match(/\d{1,3}/g) : cp, cl=crgb.length;
+			while(cl--){crgb[cl] = crgb[cl]>255 ? 255 : crgb[cl];}} 
+		else if(hu.match(na) && window.getComputedStyle)
+			{var d = doc.createElement("div");
+			d.style.color = hu.match(na)[0];
+			doc.body.appendChild(d);
+			crgb = getComputedStyle(d,null).color; 
+			if(!crgb.match(/rgb/)){return hu;} 
+			crgb = crgb.replace(/[^\d,]/g,'').split(',');
+			doc.body.removeChild(d);}
+		else if(hu.match(/hsla?/))
+			{hsl = hu.match(flo);
+		
+			crgb = hslToRgb(hsl[0]%360/360,Math.min((hsl[1])/c,1),Math.min((hsl[2])/c,1));}
+		else{return hu;}
+		rgbToHex(crgb[0]|0,crgb[1]|0,crgb[2]|0);
+		return '#'+hex;
+		}
+	else{return hu;}
+}
+
+function addOpacity(op){
+	if(op.match(trans))
+		{if(op.match(/(?:\d*(?:\.\d+)?%?,){3}0?(\.\d+)?\)/)) 
+			{var opv = op.match(/(0?(\.\d+)?)\)/)[1];
+			return opv.replace('0.','.');}
+		else if(op.match(/transparent/))
+			{return '0';}
+		else{return '1';}
+		}
+	else{return '';}
+}
+
+function rgbToHex(r,g,b){
+	hex=((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+	var s=/(\w)\1(\w)\2(\w)\3/i;
+	
+	hex=hex.match(s) ? hex.replace(s,'$1$2$3') : hex;
+	return hex;
+}
+
+
+function hslToRgb(h,s,l){var r,g,b;
+	function hue2rgb(p,q,t){
+		if(t<0){t += 1;}
+		if(t>1){t -= 1;}
+		if(t<1/6){return p+(q-p)*6*t;}
+		if(t<1/2){return q;}
+		if(t<2/3){return p+(q-p)*(2/3-t)*6;}
+		return p;
+	}
+
+	if(s===0){r=g=b=l;} // achromatic
+	else{
+		var q=l<0.5 ? l*(1+s) : l+s-l*s,
+		p=2*l-q;
+		r = hue2rgb(p,q,h + 1/3),g = hue2rgb(p,q,h),b = hue2rgb(p,q,h - 1/3);}
+	return [r*255,g*255,b*255];
+}
+
+function finishSVG(svg,uri,bl){var rects='',
+	svHead="<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%'>\n",
+	svDefs="<defs>\n"+svg+"</defs>\n"; 
+	while(bl--){rects+="<rect width='100%' height='100%' fill='url(#g"+(bl+1)+")'/>\n";}
+	var svEnd="</svg>";
+	svg=svHead+svDefs+rects+svEnd;
+
+	if(!b.checked){out.value=svg;
+		if(hasInlSvg()){sizePreview(svg);}}
+	if(u.checked||!!bgSize){uri=svHead+uri+rects+svEnd; svgToUri(uri);}
+}
+
+function svgToUri(uri){uri=uri.replace(/\n|<\/?defs>/g,'').replace(/svg' width='.*?' height='.*?'/,"svg'"); 
+	uOut='url("data:image/svg+xml,'+encodeURI(uri).replace(/%20/g,' ').replace(/#/g,'%23')+'")';
+	uCode.value=uOut;uTxt.style.display='block';
+	if(!!bgSize){bgsUriOut+=uOut+',\n';}
+	if(b.checked&&!bgSize){bUriOut+=sel+'background:'+uOut+'}\n\n';}
+}
+
+function updatePreview(){
+	sizePreview(out.value);
+	if(u.checked){svgToUri(out.value);}
+}
+
+function sizePreview(svg){ 
+	var editW,editH,editWpx,editHpx,wm=/' width='(\d+(px|%))/,hm=/height='(\d+(px|%))'>/,
+	downWarn="",
+	defCss="margin:0 auto;box-shadow:0 0 2px #777;background:#fff;border-radius:8px;background-image:"+svg+";"+bgSizeStr;
+	downWarnDiv.innerHTML=prev.style.cssText='';
+	if(svg.match(wm)){editW=svg.match(wm)[1];}
+	else if(!svg.match(/' width='.*?'>/)){editW=w+units;}
+	if(svg.match(hm)){editH=svg.match(hm)[1];}
+	else if(!svg.match(/height='.*?'>/)){editH=h+units;}
+	
+	if(!editW||!editH){alert('Please make sure your width and height are only in integer px or % values, then try updating again.');return !1;}
+	if(editW.match(/%/)){editWpx=parseFloat(editW)/c*prevW;} 
+	if(editH.match(/%/)){editHpx=parseFloat(editH)/c*prevW;}
+	var editWf = !editWpx ? parseFloat(editW) : editWpx,
+	editHf = !editHpx ? parseFloat(editH) : editHpx;
+	if(editWf>prevW){
+
+		var editWnew=Math.round(editWf/(editWf/prevW)), editHnew=Math.round(editHf/(editWf/prevW));
+		var newout=svg.replace(editW,editWnew+'px').replace(editH,editHnew+'px');
+		if(!bgSize){prev.innerHTML=downWarn+newout;}
+		else{prev.innerHTML='';downWarnDiv.innerHTML=downWarn;prev.style.cssText="width:"+editWnew+"px;height:"+editHnew+"px;"+defCss;}
+	}
+	else{
+		if(!bgSize){prev.innerHTML=svg;}
+		else{prev.innerHTML='';prev.style.cssText="width:"+editW+";height:"+editH+";"+defCss;}
+	}
+}
+
+}());
+</script>
+</body>
+</html>
