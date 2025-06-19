@@ -1,6 +1,5 @@
 https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/黄粉蓝.svg
 https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/蓝粉.svg
-https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/粉蓝.svg
 https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/粉白.svg
 https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/粉橙.svg
 https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/粉黄.svg
