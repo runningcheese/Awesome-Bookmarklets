@@ -4,7 +4,7 @@ https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/粉白
 https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/粉橙.svg
 https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/粉黄.svg
 https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/灰白.svg
-https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/灰蓝.svg
+https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/蓝灰.svg
 https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/橙紫.svg
 https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/香槟金.svg
 https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/Blur.png
