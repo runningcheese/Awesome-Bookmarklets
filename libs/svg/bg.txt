@@ -12,4 +12,4 @@ https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/Blur.p
 https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/Pink.png
 https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/PinkPurple.png
 https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/PinkGreen.png
-https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/Instagram.png
+https://gcore.jsdelivr.net/gh/runningcheese/Awesome-Bookmarklets/libs/svg/Instagram.svg
